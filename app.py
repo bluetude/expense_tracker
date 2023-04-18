@@ -45,6 +45,9 @@ def login():
 @app.route('/register')
 def register():
     if request.method == "POST":
-        return
+        conn = get_db_connection()
+        users = conn.execute('SELECT username FROM users').fetchall()
+        conn.close()
+        
     else:
         return render_template("register.html")
