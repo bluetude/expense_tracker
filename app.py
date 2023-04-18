@@ -48,6 +48,6 @@ def register():
         conn = get_db_connection()
         users = conn.execute('SELECT username FROM users').fetchall()
         conn.close()
-        
+        test
     else:
         return render_template("register.html")
