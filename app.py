@@ -33,16 +33,16 @@ def after_request(response):
     return response
 
 
-@app.route('/')
+@app.route("/")
 @login_required
 def index():
-    return redirect('/register')
+    return redirect("/register")
 
-@app.route('/login')
+@app.route("/login")
 def login():
     return redirect('/register')
 
-@app.route('/register', methods=["GET", "POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
 
@@ -53,7 +53,7 @@ def register():
 
         # Fetching all usernames from db to check if available
         with get_db_connection() as conn:
-            users = conn.execute('SELECT username FROM users').fetchall()
+            users = conn.execute("SELECT username FROM users").fetchall()
         for user in users:
             if user["username"] == username:
                 flash("This username is not available")
@@ -80,6 +80,11 @@ def register():
             cursor.execute("INSERT INTO users (username, hash) VALUES(?, ?)", user_data)
             conn.commit()
 
-        return 'Register succesfull'
+        with get_db_connection() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchall()
+            session["user_id"] = user_id[0]["id"]
+
+        
+        return "Register succesfull"
     else:
         return render_template("register.html")
