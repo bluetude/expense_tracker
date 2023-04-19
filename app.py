@@ -72,12 +72,31 @@ def add_expense():
         return render_template("add_expense.html", categories=categories)
 
 
-@app.route("/add_income")
+@app.route("/add_income", methods=["GET", "POST"])
 @login_required
 def add_income():
-    # TODO
-    return "TODO"
+    if request.method == "POST":
+        name = request.form.get("name")
+        description = request.form.get("description")
+        amount = request.form.get("amount")
+        date = request.form.get("date")
+        user_id = session.get("user_id")
 
+        if not name or not amount or not date:
+                flash("Please fill out all fields")
+                return redirect("/add_income")
+        
+        with get_db_connection() as conn:
+            data = (name, description, amount, date, user_id)
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO income (name, description, amount, date, user_id) VALUES (?, ?, ?, ?, ?)", data)
+            conn.commit()
+
+        flash(f"Income ({name}) added!")
+        return redirect("/add_income")
+
+    else:
+        return render_template("add_income.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -101,6 +120,7 @@ def login():
         return "Succesfully logged in"
     
     else:
+        session.clear()
         return render_template("login.html")
     
 
