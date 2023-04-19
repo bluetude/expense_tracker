@@ -17,7 +17,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
+# Function for connecting to SQLite DB
 def get_db_connection():
     conn = sqlite3.connect('expense_tracker.db')
     conn.row_factory = sqlite3.Row
@@ -42,12 +42,44 @@ def index():
 def login():
     return redirect('/register')
 
-@app.route('/register')
+@app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        conn = get_db_connection()
-        users = conn.execute('SELECT username FROM users').fetchall()
-        conn.close()
-        test
+
+        # Requesting username and passwords from HTML form
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        # Fetching all usernames from db to check if available
+        with get_db_connection() as conn:
+            users = conn.execute('SELECT username FROM users').fetchall()
+        for user in users:
+            if user["username"] == username:
+                flash("This username is not available")
+                return redirect("/register")
+            
+        # Checking if user typed all data
+        if not username:
+            flash("Please type in your username.")
+            return redirect("/register")
+        if not password:
+            flash("Please type in your password.")
+            return redirect("/register")
+        if not confirm_password:
+            flash("Please confirm your password")
+            return redirect("/register")
+        if password != confirm_password:
+            flash("Passwords do not match.")
+            return redirect("/register")
+        
+        # Adding new user to db
+        with get_db_connection() as conn:
+            user_data = (username, generate_password_hash(password))
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO users (username, hash) VALUES(?, ?)", user_data)
+            conn.commit()
+
+        return 'Register succesfull'
     else:
         return render_template("register.html")
