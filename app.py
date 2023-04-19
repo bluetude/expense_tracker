@@ -42,6 +42,36 @@ def index():
     return redirect("/register")
 
 
+@app.route("/add_expense", methods=["GET", "POST"])
+@login_required
+def add_expense():
+    if request.method == "POST":
+        name = request.form.get("name")
+        description = request.form.get("description")
+        amount = request.form.get("amount")
+        date = request.form.get("date")
+        category = request.form.get("category")
+
+        list = [name, description, amount, date, category]
+
+        for thing in list:
+            print(thing)
+
+        return redirect("/add_expense")
+
+    else:
+        with get_db_connection() as conn:
+            categories = conn.execute("SELECT * FROM expenses_category").fetchall()
+        return render_template("add_expense.html", categories=categories)
+
+
+@app.route("/add_income")
+@login_required
+def add_income():
+    # TODO
+    return "TODO"
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -121,3 +151,5 @@ def register():
         return "Register succesfull"
     else:
         return render_template("register.html")
+    
+
