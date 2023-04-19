@@ -9,13 +9,16 @@ from datetime import datetime
 
 from helpers import login_required, usd
 
+
 # Configure application
 app = Flask(__name__)
+
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
 
 # Function for connecting to SQLite DB
 def get_db_connection():
@@ -38,9 +41,39 @@ def after_request(response):
 def index():
     return redirect("/register")
 
-@app.route("/login")
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return redirect('/register')
+    if request.method == "POST":
+
+        # Requesting username and passwords from HTML form
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        with get_db_connection() as conn:
+            rows = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchall()
+        
+        # Check if username exists in db and check password
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
+            flash("Invalid username and/or password")
+            return redirect("/login")
+
+        # Remember user id in session
+        session["user_id"] = rows[0]["id"]
+
+        return "Succesfully logged in"
+    
+    else:
+        return render_template("login.html")
+    
+
+@app.route("/logout")
+def logout():
+    # Forget user ID
+    session.clear()
+
+    #R edirect to login form
+    return redirect("/login")    
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -84,7 +117,7 @@ def register():
             user_id = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchall()
             session["user_id"] = user_id[0]["id"]
 
-        
+        # change to index when added !!!!
         return "Register succesfull"
     else:
         return render_template("register.html")
