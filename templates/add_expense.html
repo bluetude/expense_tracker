@@ -20,7 +20,7 @@
         </div>
         <div>
             {% for category in categories %}
-            <input type="radio" id="{{ category.id }}" name="category" value="{{ category.category }}">
+            <input type="radio" id="{{ category.id }}" name="category" value="{{ category.id }}">
             <label for="{{ category.id }}">{{ category.category }}</label>
             {% endfor %}
         </div>
