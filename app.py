@@ -13,6 +13,8 @@ from helpers import login_required, usd
 # Configure application
 app = Flask(__name__)
 
+# Custom filter
+app.jinja_env.filters["usd"] = usd
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
@@ -39,7 +41,10 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    return redirect("/register")
+    user_id = session.get("user_id")
+    with get_db_connection() as conn:
+        data = conn.execute("SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC", (user_id,)).fetchall()
+    return render_template("index.html", data=data)
 
 
 @app.route("/add_expense", methods=["GET", "POST"])
@@ -120,7 +125,6 @@ def login():
         return "Succesfully logged in"
     
     else:
-        session.clear()
         return render_template("login.html")
     
 

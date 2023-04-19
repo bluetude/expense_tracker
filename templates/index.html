@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+            {% for record in data %}
+            <tr>
+                <th>{{ record.name }}</th>
+                <th>{{ record.description }}</th>
+                <th>{{ record.amount | usd }}</th>
+                <th>{{ record.date }}</th>
+            </tr>
+            {% endfor %}  
+        </thead>
+    </table>
+    
+{% endblock %}
