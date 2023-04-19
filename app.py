@@ -6,6 +6,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from helpers import login_required, usd
 
@@ -38,13 +39,21 @@ def after_request(response):
     return response
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    user_id = session.get("user_id")
-    with get_db_connection() as conn:
-        data = conn.execute("SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC", (user_id,)).fetchall()
-    return render_template("index.html", data=data)
+    if request.method == "POST":
+        date_from = request.form.get("date_from")
+        date_to = request.form.get("date_to")
+        user_id = session.get("user_id")
+        with get_db_connection() as conn:
+            data = conn.execute("SELECT expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date <= ? ORDER BY date DESC", (user_id, date_from, date_to)).fetchall()
+        return render_template("index.html", data=data)
+    else:
+        user_id = session.get("user_id")
+        with get_db_connection() as conn:
+            data = conn.execute("SELECT expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date < ? ORDER BY date DESC", (user_id, datetime.today().replace(day=1), (datetime.today() + relativedelta(day=31)))).fetchall()
+        return render_template("index.html", data=data)
 
 
 @app.route("/add_expense", methods=["GET", "POST"])
@@ -122,7 +131,8 @@ def login():
         # Remember user id in session
         session["user_id"] = rows[0]["id"]
 
-        return "Succesfully logged in"
+        flash("Succesfully logged in")
+        return redirect("/")
     
     else:
         return render_template("login.html")
@@ -178,8 +188,8 @@ def register():
             user_id = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchall()
             session["user_id"] = user_id[0]["id"]
 
-        # change to index when added !!!!
-        return "Register succesfull"
+        flash("Registered succesfully!")
+        return redirect("/")
     else:
         return render_template("register.html")
     

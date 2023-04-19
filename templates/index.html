@@ -5,12 +5,25 @@
 {% endblock %}
 
 {% block main %}
+    <h2>EXPENSES</h2>
+    <form action="/" method="POST">
+        <div>
+            <p>FROM:</p>
+            <input autocomplete="off" id="date_from" name="date_from" type="date">
+        </div>
+        <div>
+            <p>TO:</p>
+            <input autocomplete="off" id="date_to" name="date_to" type="date">
+        </div>
+        <button type="submit">APPLY</button>
+    </form>
     <table>
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Amount</th>
+                <th>Category</th>
                 <th>Date</th>
             </tr>
             {% for record in data %}
@@ -18,6 +31,7 @@
                 <th>{{ record.name }}</th>
                 <th>{{ record.description }}</th>
                 <th>{{ record.amount | usd }}</th>
+                <th>{{ record.category }}</th>
                 <th>{{ record.date }}</th>
             </tr>
             {% endfor %}  
