@@ -5,6 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Expense Tracker | {% block title %}{% endblock %}</title>
     </head>
+    {% if get_flashed_messages() %}
+        <header>
+            <div role="alert">
+                {{ get_flashed_messages() | join(" ") }}
+            </div>
+        </header>
+    {% endif %}
     <body>
         <main>
             {% block main %}{% endblock %}
