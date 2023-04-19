@@ -51,12 +51,19 @@ def add_expense():
         amount = request.form.get("amount")
         date = request.form.get("date")
         category = request.form.get("category")
+        user_id = session.get("user_id")
 
-        list = [name, description, amount, date, category]
+        if not name or not amount or not date or not category:
+            flash("Please fill out all fields")
+            return redirect("/add_expense")
+        
+        with get_db_connection() as conn:
+            data = (name, description, amount, date, category, user_id)
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO expenses (name, description, amount, date, category, user_id) VALUES (?, ?, ?, ?, ?, ?)", data)
+            conn.commit()
 
-        for thing in list:
-            print(thing)
-
+        flash(f"Expense ({name}) added!")
         return redirect("/add_expense")
 
     else:
