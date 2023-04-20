@@ -52,18 +52,18 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Description</th>
                     <th>Amount</th>
                     <th>Category</th>
                     <th>Date</th>
+                    <th></th>
                 </tr>
                 {% for record in data %}
                 <tr>
                     <th>{{ record.name }}</th>
-                    <th>{{ record.description }}</th>
                     <th>{{ record.amount | usd }}</th>
                     <th>{{ record.category }}</th>
                     <th>{{ record.date }}</th>
+                    <th><form action="/removexpense" method="POST"><button type="submit" name="remove" value="{{ record.id }}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button></form></th>
                 </tr>
                 {% endfor %}  
             </thead>

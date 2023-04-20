@@ -47,7 +47,7 @@ def index():
         date_to = request.form.get("date_to")
         user_id = session.get("user_id")
         with get_db_connection() as conn:
-            data = conn.execute("SELECT expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date <= ? ORDER BY date DESC", (user_id, date_from, date_to)).fetchall()
+            data = conn.execute("SELECT expenses.id, expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date <= ? ORDER BY date DESC", (user_id, date_from, date_to)).fetchall()
         
         dict = {}
         for record in data:
@@ -69,7 +69,7 @@ def index():
     else:
         user_id = session.get("user_id")
         with get_db_connection() as conn:
-            data = conn.execute("SELECT expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date <= ? ORDER BY date DESC", (user_id, date.today().replace(day=1), (date.today() + relativedelta(day=31)))).fetchall()
+            data = conn.execute("SELECT expenses.id, expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date <= ? ORDER BY date DESC", (user_id, date.today().replace(day=1), (date.today() + relativedelta(day=31)))).fetchall()
         
         dict = {}
         for record in data:
@@ -118,6 +118,18 @@ def add_expense():
         with get_db_connection() as conn:
             categories = conn.execute("SELECT * FROM expenses_category").fetchall()
         return render_template("add_expense.html", categories=categories)
+    
+@app.route("/removexpense", methods=["GET", "POST"])
+@login_required
+def removexpense():
+    if request.method == "POST":
+        id = request.form.get("remove")
+        print(id)
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM expenses WHERE id = ?", (id,))
+            conn.commit()
+        return redirect("/")
 
 
 @app.route("/add_income", methods=["GET", "POST"])
