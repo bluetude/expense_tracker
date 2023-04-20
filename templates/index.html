@@ -26,40 +26,58 @@
 {% endblock %}
 
 {% block main %}
-    <h2>EXPENSES</h2>
-    <form action="/" method="POST">
-        <div>
-            <p>FROM:</p>
-            <input autocomplete="off" id="date_from" name="date_from" type="date">
-        </div>
-        <div>
-            <p>TO:</p>
-            <input autocomplete="off" id="date_to" name="date_to" type="date">
-        </div>
-        <button type="submit">APPLY</button>
-    </form>
-    {% if display %}
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Category</th>
-                <th>Date</th>
-            </tr>
-            {% for record in data %}
-            <tr>
-                <th>{{ record.name }}</th>
-                <th>{{ record.description }}</th>
-                <th>{{ record.amount | usd }}</th>
-                <th>{{ record.category }}</th>
-                <th>{{ record.date }}</th>
-            </tr>
-            {% endfor %}  
-        </thead>
-    </table>
+    
+    <div class="container text-center">
+        <h2>EXPENSES</h2>
+    <div class="row">
 
-    <div id="piechart" style="width: 900px; height: 500px;"></div>
+        <div class="col-sm-12 col-md-6">
+        <form action="/" method="POST">
+            <div class="row">
+            <div class="col">
+                <p>FROM:</p>
+                <input autocomplete="off" id="date_from" name="date_from" type="date">
+            </div>
+            <div class="col">
+                <p>TO:</p>
+                <input autocomplete="off" id="date_to" name="date_to" type="date">
+            </div>
+            
+            <button type="submit" class="btn btn-primary my-3">APPLY</button>
+            </div>
+        </form>
+        {% if display %}
+        <div class="container align-items-center">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                </tr>
+                {% for record in data %}
+                <tr>
+                    <th>{{ record.name }}</th>
+                    <th>{{ record.description }}</th>
+                    <th>{{ record.amount | usd }}</th>
+                    <th>{{ record.category }}</th>
+                    <th>{{ record.date }}</th>
+                </tr>
+                {% endfor %}  
+            </thead>
+        </table>
+        </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6">
+        <div id="piechart" style="width: 650px; height: 400px;"></div>
+        </div>
+        {% else %}
+        <h3>No expenses to display</h3>
+
+    </div>
+    </div>
     {% endif %}
 {% endblock %}
