@@ -5,7 +5,7 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime
+from datetime import date
 from dateutil.relativedelta import relativedelta
 
 from helpers import login_required, usd
@@ -48,12 +48,46 @@ def index():
         user_id = session.get("user_id")
         with get_db_connection() as conn:
             data = conn.execute("SELECT expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date <= ? ORDER BY date DESC", (user_id, date_from, date_to)).fetchall()
-        return render_template("index.html", data=data)
+        
+        dict = {}
+        for record in data:
+            if record["category"] not in dict:
+                dict[record["category"]] = float(record["amount"])
+            else:
+                dict[record["category"]] += float(record["amount"])
+
+        chart = []
+        chart.append(["Category", "Amount"])
+        for key, value in dict.items():
+            chart.append([key, value])
+
+        display = True
+        if len(chart) == 1:
+            display = False
+
+        return render_template("index.html", data=data, chart=chart, display=display)
     else:
         user_id = session.get("user_id")
         with get_db_connection() as conn:
-            data = conn.execute("SELECT expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date < ? ORDER BY date DESC", (user_id, datetime.today().replace(day=1), (datetime.today() + relativedelta(day=31)))).fetchall()
-        return render_template("index.html", data=data)
+            data = conn.execute("SELECT expenses.name, expenses.description, expenses.amount, expenses_category.category, expenses.date FROM expenses INNER JOIN expenses_category ON expenses.category = expenses_category.id WHERE user_id = ? AND expenses.date >= ? AND expenses.date <= ? ORDER BY date DESC", (user_id, date.today().replace(day=1), (date.today() + relativedelta(day=31)))).fetchall()
+        
+        dict = {}
+        for record in data:
+            if record["category"] not in dict:
+                dict[record["category"]] = float(record["amount"])
+            else:
+                dict[record["category"]] += float(record["amount"])
+
+        chart = []
+        chart.append(["Category", "Amount"])
+        for key, value in dict.items():
+            chart.append([key, value])     
+
+        display = True
+        if len(chart) == 1:
+            display = False   
+        
+        return render_template("index.html", data=data, chart=chart, display=display)
 
 
 @app.route("/add_expense", methods=["GET", "POST"])

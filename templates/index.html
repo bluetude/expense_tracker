@@ -4,6 +4,27 @@
     Home
 {% endblock %}
 
+{% block head %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable({{ chart|tojson }});
+
+        var options = {
+          title: 'Your spendings'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+        chart.draw(data, options);
+      }
+    </script>
+{% endblock %}
+
 {% block main %}
     <h2>EXPENSES</h2>
     <form action="/" method="POST">
@@ -17,6 +38,7 @@
         </div>
         <button type="submit">APPLY</button>
     </form>
+    {% if display %}
     <table>
         <thead>
             <tr>
@@ -37,5 +59,7 @@
             {% endfor %}  
         </thead>
     </table>
-    
+
+    <div id="piechart" style="width: 900px; height: 500px;"></div>
+    {% endif %}
 {% endblock %}
